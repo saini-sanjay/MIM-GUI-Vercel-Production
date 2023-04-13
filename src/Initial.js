@@ -1,20 +1,60 @@
 import './App.css';
 import {formatDate,nextUpdateForInitial,selectElementContents,formatDateTwo} from './Dateformat';
 import emailjs from '@emailjs/browser';
+import axios from 'axios';
 
-function sendSMS(number,msg){
+function sendSMS(formik,msg,email,time2){
   var templateParams = {
-    ticket: number,
-    message: msg
+    ticket: formik.values.incident,
+    message: msg,
+    to_email:email
 };
 
-  emailjs.send('service_qp7r9l5', 'template_wza3icy',templateParams, 'VhHT2tewEIsLz03C0')
+  emailjs.send('service_rqhtxb7', 'template_wza3icy',templateParams, 'VhHT2tewEIsLz03C0')
   .then((result) => {
       console.log(result.text);
   }, (error) => {
       console.log(error.text);
   });
+const newmsg=`Incident No:${formik.values.incident}
+%0ASeverity: ${formik.values.severity}
+%0AImpacted OPCO: ${formik.values.country}
+%0AImpacted Application/s: ${formik.values.ip_details}
+%0AInitial Issue Reported: ${formik.values.incident_description}
+%0AStart Time (OPCO Time): ${time2}
+%0AStatus: In Progress
+%0ARecovery Plan:${formik.values.comments}`
+
+
+axios({
+  method: 'post',
+  url: 'http://localhost:3001/sendMessage',
+  data: {
+    a:formik.values.incident,
+    b: formik.values.severity,
+    c: formik.values.country,
+    d: formik.values.ip_details,
+    e: formik.values.incident_description,
+    f: time2,
+    g: 'In Progress',
+    h: formik.values.comments
+  }
+}).then((res)=>console.log(res)).catch(err=>console.log(err));
+
+//Sending notification on Telegram group
+
+// axios.get(`https://api.telegram.org/bot5744972442:AAFV223bOamMbyvAmrgp2-cHFK_h7k9VVkg/sendMessage?chat_id=-619631270&text=${newmsg}`
+// ).then(
+//   (res)=>{
+//     //console.log(res)
+//   }
+// ).catch((err)=>{
+//   console.log(err);
+// })
+
 };
+
+
   
 
 
@@ -106,10 +146,10 @@ function Initial(props) {
   </div>
   <div className='d-flex justify-content-center'>
   <button type="button" className="btn btn-success" onClick={()=>{
-    sendSMS(formik.values.incident,msgbody);
+    sendSMS(formik,msgbody,props.to_email,time2);
   selectElementContents(document.getElementById('copytable'));
   }
-  }>Copy Initial Notification</button>
+  }>Copy Initial Notification + Send on Telegram</button>
   </div>
   
   <hr></hr>

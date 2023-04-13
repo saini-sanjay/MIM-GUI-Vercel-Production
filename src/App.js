@@ -1,8 +1,15 @@
 import { useFormik } from 'formik';
+import React, { useState } from 'react';
 import './App.css';
+import './mainpage.css';
 import Initial from './Initial';
 import Update from './Update';
 import Restoration from './Restoration';
+import { opcoTimeConvert } from './Dateformat';
+import Particles from 'react-tsparticles';
+import {particlesConfig} from './Dateformat'
+import { loadFull } from "tsparticles";
+import Login from './Login';
 
 const validate = values => {
   const errors = {};
@@ -20,27 +27,18 @@ if(ohrs<0){
   errors.service_restoration_time="Warning! Outage hours negative. Check again"
 }
 
-  
-
-  // if (!values.lastName) {
-  //   errors.lastName = 'Required';
-  // } else if (values.lastName.length > 20) {
-  //   errors.lastName = 'Must be 20 characters or less';
-  // }
-
-  // if (!values.email) {
-  //   errors.email = 'Required';
-  // } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-  //   errors.email = 'Invalid email address';
-  // }
-
   return errors;
 };
 
 function App() {
 
-  
+ const [loggedIn,setLoggedIn] =useState(false);
+ const [user,setUser]=useState('');
 
+const setLogIn=(user)=>{
+   setUser(user);
+   setLoggedIn(true);
+}
   const formik = useFormik({
     initialValues: {
       incident: '',
@@ -51,6 +49,7 @@ function App() {
       service_impact_start_time:'',
       service_restoration_time:'',
       ticket_resolution_time:'',
+      ist_to_opco_converter:'',
       incident_description:'',
       business_service_impact:'',
       ip_details:'',
@@ -64,13 +63,28 @@ function App() {
       alert(JSON.stringify(values, null, 2));
     },
   });
+  // const particlesInit = async (main) => {
+  //   console.log(main);
 
+  //   // you can initialize the tsParticles instance (main) here, adding custom shapes or presets
+  //   // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
+  //   // starting from v2 you can add only the features you need reducing the bundle size
+  //   await loadFull(main);
+  // };
+
+  const particlesLoaded = (container) => {
+    console.log(container);
+  };
+
+  
 
 
 return (
-    <div className="App">
+    <div className="App" style={{ position: 'relative', overflow: "hidden" }}>
+    {loggedIn?
+    
      <div className='container'>
-    <form className="row g-3" id="formcss" onSubmit={formik.handleSubmit}>
+    <form className="row g-3" id="formcss" onSubmit={formik.handleSubmit} autoComplete='true'>
     <div className="col-md-3">
       <label htmlFor="incident" className="form-label">Incident Number</label>
       <input type="text" className="form-control" id="incident" name="incident" onChange={formik.handleChange} value={formik.values.incident}/>
@@ -132,6 +146,16 @@ return (
       <label htmlFor="ticket_resolution_time" className="form-label">Ticket Resolution Time(OPCO)</label>
       <input type="datetime-local" className="form-control" id="ticket_resolution_time" name="ticket_resolution_time" onChange={formik.handleChange} value={formik.values.ticket_resolution_time}/>
     </div>
+    <div className="col-md-4 bg-warning">
+      <label htmlFor="ist_to_opco_converter" className="form-label">Convert IST to OPCO</label>
+      <p>Enter IST time: </p>    
+      <input type="datetime-local" className="form-control" id="ist_to_opco_converter" name="ist_to_opco_converter" onChange={formik.handleChange} value={formik.values.ist_to_opco_converter}/>
+    </div>
+    <div className="col-md-8 bg-warning">
+      <br/><br/>
+      <p>OPCO Time:</p>
+      <p>{opcoTimeConvert(formik.values.ist_to_opco_converter,formik.values.country)}</p>
+    </div>
     <div className="col-md-6">
       <label htmlFor="incident_description" className="form-label">Incident Description</label>
       <textarea rows="2" className="form-control" name="incident_description" id="incident_description" onChange={formik.handleChange} value={formik.values.incident_description}/>
@@ -175,7 +199,7 @@ return (
     </div>
     
     <div className="col-12">
-      <button type="submit" className="btn btn-primary">Sign in</button>
+    <button name="reset" className='btn btn-danger mb-2' onClick={formik.handleReset}>Reset</button>
     </div>
   </form>
   <br></br>
@@ -183,7 +207,7 @@ return (
 
  
 
- <Initial data={formik}/>
+ <Initial data={formik} to_email={user}/>
  <Update  data={formik}/>
  <Restoration data={formik}/>
 
@@ -191,6 +215,8 @@ return (
 
  
    </div>
+    :<Login setLoggedIn={setLogIn}/>
+    }
     </div>
   );
 }
