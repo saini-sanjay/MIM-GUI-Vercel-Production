@@ -8,7 +8,9 @@ const userList=['sanjay.saini4@rediffmail.com',
                 'awasthi.aditya1795@gmail.com',
                 'mimp@test.com',
                 'arushichaubeyforspace@gmail.com',
-                'pandaeuphoric@gmail.com']
+                'pandaeuphoric@gmail.com',
+                'Issack94845@gmail.com',
+              'annu30@gmail.com','deshmukhsonam13@gmail.com']
 
 
 
